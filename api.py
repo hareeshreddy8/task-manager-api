@@ -1,16 +1,18 @@
 from typing import Optional,List
 from pydantic import BaseModel
+from datetime import date
 from task_manager import add_task,mark_task_done,delete_task
 from storage import load_tasks,save_tasks
 from fastapi import FastAPI
+from database import create_table,insert_task
 
-
+create_table()
 app = FastAPI()
 
 class TaskCreate(BaseModel):
     name : str
     priority : str
-    due_date : str
+    due_date : date
 
 class Task(BaseModel):
     name : str
@@ -38,9 +40,16 @@ def home():
 #create task
 @app.post("/tasks",response_model=TaskResponse)
 def create_task_api(task : TaskCreate):
-    response = add_task(tasks, task.name, task.priority, task.due_date)
-    save_tasks(tasks)
-    return response
+    insert_task(task.name,task.priority,task.due_date)
+    return {"status": "success",
+            "message": "Task inserted successfully",
+            "data": {
+                "name": task.name,
+                "priority": task.priority,
+                "due_date" : task.due_date,
+                "status" : False
+            }
+    }
 
 @app.get("/tasks",response_model=TaskListResponse)
 def get_tasks_api():
