@@ -4,7 +4,7 @@ from datetime import date
 from task_manager import add_task,mark_task_done,delete_task
 from storage import load_tasks,save_tasks
 from fastapi import FastAPI
-from database import create_table,insert_task
+from database import create_table,insert_task,get_all_tasks,update_task_status,delete_data
 
 create_table()
 app = FastAPI()
@@ -15,6 +15,7 @@ class TaskCreate(BaseModel):
     due_date : date
 
 class Task(BaseModel):
+    id : int
     name : str
     priority : Optional[str] = None
     due_date : Optional[str] = None
@@ -53,18 +54,36 @@ def create_task_api(task : TaskCreate):
 
 @app.get("/tasks",response_model=TaskListResponse)
 def get_tasks_api():
+    tasks = get_all_tasks()
     return {"status": "success",
            "message": "Tasks fetched successfully",
             "data": tasks }
 
-@app.put("/tasks/{index}",response_model=TaskResponse)
-def mark_task_done_api(index:int):
-    response = mark_task_done(tasks,index)
-    save_tasks(tasks)
-    return response 
+@app.put("/tasks/{task_id}")
+def mark_task_done_api(task_id:int):
+    updated_task = update_task_status(task_id)
+    if not updated_task:
+        return {
+            "status": "error",
+            "message": "Task not found",
+            "data": None
+        }
 
-@app.delete("/tasks/{index}",response_model=TaskResponse)
-def delete_task_api(index:int):
-    response = delete_task(tasks,index)
-    save_tasks(tasks)
-    return response 
+    return {
+        "status": "success",
+        "message": "Task updated",
+        "data": updated_task
+    }
+
+
+@app.delete("/tasks/{task_id}")
+def delete_task_api(task_id:int):
+    deleted_task = delete_data(task_id)
+    if not deleted_task :
+        return {"status": "error",
+                "message": "Task not found",
+                "data": None}
+    return {"status": "success",
+                "message": "Task deleted successfully",
+                "data": deleted_task}
+ 
