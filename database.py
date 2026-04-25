@@ -107,3 +107,51 @@ def delete_data(task_id):
         }
     return None
 
+def edit_data_name(task_id,name):
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+                UPDATE tasks
+                SET name = ?
+                WHERE id = ?
+                """,(name,task_id))
+    
+    conn.commit()
+
+    cursor.execute("""SELECT * FROM tasks WHERE id = ?""",(task_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return {
+            "id": row[0],
+            "name": row[1],
+            "priority": row[2],
+            "status": bool(row[3]),
+            "due_date": row[4]
+        }
+    return None
+
+def filter_data(priority = None,status = None):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM tasks WHERE 1=1"
+    params = []
+
+    if priority:
+        query += " AND priority = ?"
+        params.append(priority)
+
+    if status is not None :
+        query += " AND status = ?"
+        params.append(status)
+
+    cursor.execute(query,params)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return rows

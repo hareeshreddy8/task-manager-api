@@ -4,53 +4,38 @@ def create_task(task_name,priority,due_date):
     
 
 #Mark task as done using its index
-def mark_task_done(tasks,index):
-    if not tasks:
-        return {"status" : "error","message":"No task available. ","data" : None}
-    if not isinstance(index,int):
-        return {"status" : "error","message":"Index must be an integer. ","data" : None}
-    if not 0 <= index < len(tasks):
-        return {"status" : "error","message":"Index out of range. ","data" :  None}
-    #update task with that index  
-    if tasks[index]["status"]:
-        return {"status" : "error","message":"Task already completed. ","data" : tasks[index]}
+def mark_task_done(task_id,update_task):
     
-    tasks[index]["status"] = True
-    return {"status" : "success",
-            "message":"Task updated successfully",
-            "data" : tasks[index]}
+    #update task with that taskid in the database
+     
+    updated_task = update_task(task_id)
+    
+    if not updated_task:
+        return None,"Task not found"
+    return updated_task,None
 
 
 #Delete task using its index
-def delete_task(tasks,index):
-    #validating tasks
-    if not tasks :
-        return {"status" : "error","message":"No task available. ","data" : None}
-    #validating index type
-    if not isinstance(index,int):
-        return {"status" : "error","message":"Index must be in numbers ","data" : None}
-    #validating index range
-    if not 0 <= index < len(tasks) :
-        return {"status" : "error","message":"Index out of range.  ","data" : None}
-    #update tasks by deleting using its index 
-    deleted_task= tasks.pop(index)
-
-    return {"status": "success","message": "Task deleted successfully.","data": deleted_task}
+def delete_task(task_id,delete_task):
+    #deleting task in database
+    deleted_task = delete_task(task_id)
+    if not deleted_task:
+        return None,"Task not found"
+    return deleted_task,None
 
 #Edit name of existing task using index
-def edit_task(tasks,index : int,new_name:str):
-    if not tasks:
-        return {"status" : "error","message":"No tasks available.","data": None}
-    if not 0 <= index < len(tasks) :
-        return {"status" : "error","message":"Index out of range.","data": None}
+def edit_task(task_id : int,new_name:str,edit_data_name):
     if not new_name or not new_name.strip():
-        return {"status" : "error","message":"Invalid name.","data": None}
-    new_name = new_name.strip()
-    if tasks[index]["name"] == new_name:
-        return {"status" : "error","message":"Name must be new. ","data": None}
-    tasks[index]["name"] = new_name
-    return {"status" : "success","message":"Task name updated successfully.","data": tasks[index]}
+        return None,("Invalid task name. ",400)
+    
+    result = edit_data_name(task_id,new_name)
 
+    if not result :
+        return None,("Task not found",404)
+    
+    return result,None
+    
+    
 
 
 #Search tasks with task name 
@@ -67,14 +52,16 @@ def search_task(tasks,name):
     return {"status": "success","message": "Tasks found successfully","data": tasks_found}
 
 
-#filter task with priority 
-def filter_tasks_by_priority(tasks,priority):
-    filtered_tasks = []
-    priority = priority.lower()
-    for task in tasks:
-        if task.get("priority") == priority.lower():
-            filtered_tasks.append(task)
-
+#filter tasks with priority or status 
+def filter_tasks(priority,status,filter_data):
+    if priority:
+        priority = priority.lower()
+    if not  priority or priority in {"high","low","medium"}:
+        return None,("Invalid priority",400)
+    filtered_tasks = filter_data(priority,status)
+    
+    if not filtered_tasks:
+        return None,("No tasks found",404)
     return filtered_tasks
 
 #sort tasks by duedate
@@ -105,34 +92,22 @@ def get_task_stats(tasks):
     return stats
 
 #implementing function without input() and print() only structured response
-def add_task(tasks,name,priority,due_date):
+def add_task(task,insert_task):
     #validating name 
-    if not name or not name.strip():
-        return {"status": "error","message":"Invalid name.","data":None}
-    priority = priority.lower()
-    if priority not in {"high","medium","low"}:
-        return {"status": "error","message":"Invalid priority.","data":None}
-    parts = due_date.split("-") 
-    if len(parts) != 3:
-        return {"status": "error","message":"Invalid duedate. must be in the format YYYY-MM-DD. ","data":None}
-    year,month,day = parts
-    
-    if not(year.isdigit() and month.isdigit() and day.isdigit()):
-        return {"status": "error","message":"Date must contain only numbers. ","data":None}
-    
-    if not(len(year) == 4 and len(month) == 2 and len(day) == 2) :
-        return {"status": "error","message":"Invalid date format. ","data":None}
-    
-    month = int(month)
-    day = int(day)
-    
-    if not (0 < month <= 12 and 0 < day <= 31):
-        return {"status": "error","message":"Invalid month or day ","data":None}
-    
-    task = create_task(name,priority,due_date)
-    tasks.append(task)
+    if not task.name.strip():
+        return None,"Task name cannot br empty"
+    task.priority = task.priority.lower()
+    if task.priority not in {"high","medium","low"}:
+        return None,"Invalid priority."
+    #DB
+    insert_task(task.name,task.priority,task.due_date)
 
-    return {"status": "success","message":"Task created successfully. ","data":tasks}
+    return {
+        "name": task.name,
+        "priority": task.priority,
+        "due_date": task.due_date,
+        "status": False
+    },None
         
             
         
