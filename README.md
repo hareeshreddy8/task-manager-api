@@ -1,103 +1,116 @@
-# 🧠 Productivity Tracker (CLI → FastAPI Backend)
+# 🧠 Productivity Tracker (FastAPI Backend)
 
 ## 📌 Overview
 
-This project is a task management system that was initially built as a command-line application and later upgraded into a FastAPI-based REST API.
+This project is a task management backend system built using FastAPI.  
+It was initially developed as a CLI application and later evolved into a RESTful API with proper request handling, validation, and database integration.
 
-The upgrade introduced structured request handling, validation, and the ability to interact with the system over HTTP, making it more scalable and closer to real-world backend applications.
+The system demonstrates core backend concepts such as API design, layered architecture, and database operations.
 
 ---
 
 ## 🚀 Features
 
-* Add, edit, and delete tasks
-* Mark tasks as completed
-* Search tasks by name
-* Filter tasks by priority (high, medium, low)
-* Sort tasks by due date and priority
-* Structured request and response handling using Pydantic
-* Persistent storage using JSON
-* RESTful API design with CRUD operations
+- Create, update, and delete tasks (CRUD)
+- Mark tasks as completed
+- Filter tasks by priority and status
+- Sort tasks by due date and priority (custom logic)
+- Task statistics (total, completed, pending)
+- Structured request/response handling using Pydantic
+- Persistent storage using SQLite
+- Proper HTTP status codes and error handling
 
 ---
 
 ## 🛠️ Tech Stack
 
-* Python
-* FastAPI
-* Pydantic
-* JSON (for storage)
+- Python
+- FastAPI
+- Pydantic
+- SQLite
 
 ---
 
 ## 📂 Project Structure
+task-manager-api/
+│── api.py # API layer (routes & request handling)
+│── task_manager.py # Business logic layer
+│── database.py # Database operations (SQL queries)
+│── README.md
 
-```text
-productivitytracker/
-│── main.py          # CLI interface
-│── api.py           # FastAPI routes (API layer)
-│── task_manager.py  # Business logic
-│── storage.py       # JSON load/save operations
-│── tasks.json       # Data storage
-```
 
 ---
 
 ## ⚙️ How to Run
 
-### 🔹 Run CLI Version
+### Install Dependencies
+pip install fastapi uvicorn
 
-
-python main.py
-
-### 🔹 Run API Version
+### Run Server
 
 uvicorn api:app --reload
 
-### 🔹 Access API Docs
+
+### Access API Docs
+
+Open in browser:
+
 
 http://127.0.0.1:8000/docs
+
 
 ---
 
 ## 📡 API Endpoints
 
-* **POST /tasks** → Create a new task
-* **GET /tasks** → Get all tasks
-* **PUT /tasks/{index}** → Mark a task as completed
-* **DELETE /tasks/{index}** → Delete a task
+### Core CRUD
+
+- POST /tasks → Create a new task  
+- GET /tasks → Get all tasks  
+- PUT /tasks/{task_id} → Update task status  
+- DELETE /tasks/{task_id} → Delete task  
+
+### Advanced Features
+
+- PATCH /tasks/{task_id}/name → Update task name  
+- GET /tasks/filter → Filter tasks  
+- GET /tasks/sort → Sort tasks  
+- GET /tasks/stats → Get task statistics  
 
 ---
 
 ## 🧠 Key Learnings
 
-* Converted a CLI application into a RESTful API
-* Understood how FastAPI maps routes to handler functions
-* Learned how Pydantic models validate and structure data
-* Implemented request body handling using JSON
-* Designed clean API responses with response models
-* Handled validation errors and debugging effectively
-* Separated API layer from business logic for better structure
+- Designed a RESTful API using FastAPI
+- Implemented layered architecture (API → Logic → Database)
+- Used Pydantic for request validation and structured responses
+- Integrated SQLite for persistent storage
+- Handled errors using HTTPException and proper status codes
+- Implemented filtering and sorting using SQL queries
+- Prevented SQL injection using parameterized queries and validation
 
 ---
 
 ## ⚠️ Limitations
 
-* Uses JSON file instead of a database
-* Not suitable for concurrent users (race conditions possible)
-* Uses index instead of unique identifiers
+- SQLite is not ideal for high concurrency systems
+- No authentication (single-user system)
+- No pagination for large datasets
 
 ---
 
 ## 🚀 Future Improvements
 
-* Replace JSON storage with SQLite/PostgreSQL
-* Add authentication (JWT)
-* Use UUID instead of index-based operations
-* Deploy the API to cloud platforms
+- Add authentication (JWT)
+- Migrate to PostgreSQL
+- Add pagination
+- Add caching
+- Deploy to cloud (Render / AWS)
 
 ---
 
 ## 🎯 Summary
 
-This project demonstrates backend fundamentals such as API design, validation, routing, and data persistence, and serves as a strong foundation for building scalable systems.
+This project demonstrates backend fundamentals such as API design, validation, database integration, and clean architecture.  
+It reflects the ability to build and structure a complete backend system.
+
