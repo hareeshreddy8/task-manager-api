@@ -155,3 +155,59 @@ def filter_data(priority = None,status = None):
     conn.close()
 
     return rows
+
+
+
+def sort_data(by):
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    if by == "priority":
+        query = """
+            SELECT * FROM tasks 
+            ORDER BY 
+            CASE priority
+                WHEN 'high' THEN 1
+                WHEN 'medium' THEN 2
+                WHEN 'low' THEN 3
+            END
+            """
+
+    else :
+        query = f"SELECT * FROM tasks ORDER BY {by}"
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    tasks = []
+    if rows:
+        for row in rows :
+            tasks.append({
+            "id": row[0],
+            "name": row[1],
+            "priority": row[2],
+            "status": bool(row[3]),
+            "due_date": row[4]
+            })
+
+
+
+    return tasks 
+
+def data_stats():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""SELECT COUNT(*) FROM tasks""")
+    total = cursor.fetchone()[0]
+
+    cursor.execute("""SELECT COUNT(*) FROM tasks WHERE status = 1""")
+
+    completed = cursor.fetchone()[0]
+
+    return {
+        "total": total,
+        "completed" : completed,
+        "incomplete" : total - completed
+    }

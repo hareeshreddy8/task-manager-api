@@ -56,49 +56,39 @@ def search_task(tasks,name):
 def filter_tasks(priority,status,filter_data):
     if priority:
         priority = priority.lower()
-    if not  priority or priority in {"high","low","medium"}:
+    if not  priority or priority not in {"high","low","medium"}:
         return None,("Invalid priority",400)
     filtered_tasks = filter_data(priority,status)
     
     if not filtered_tasks:
         return None,("No tasks found",404)
-    return filtered_tasks
+    return filtered_tasks,None
 
-#sort tasks by duedate
-def sort_tasks_by_due_date(tasks):
-    return sorted(tasks,key = lambda x: x.get("due_date","9999-12-31"))
+# #sort tasks by duedate
+# def sort_tasks_by_due_date(tasks):
+#     return sorted(tasks,key = lambda x: x.get("due_date","9999-12-31"))
 
-#sorting by priority
-def sort_tasks_by_priority(tasks):
-    priority_order = {"high" : 1,"medium": 2,"low":3}
-    return sorted(tasks, key = lambda x : priority_order.get(x.get("priority").lower(),99))
+# #sorting by priority
+# def sort_tasks_by_priority(tasks):
+#     priority_order = {"high" : 1,"medium": 2,"low":3}
+#     return sorted(tasks, key = lambda x : priority_order.get(x.get("priority").lower(),99))
 
 
 #To get status of tasks
-def get_task_stats(tasks):
-    stats = {}
-    for task in tasks:
-        stats["total"] = stats.get("total",0) + 1
-        if task.get("status"):
-            stats["completed"] = stats.get("completed",0) + 1
-
-        else :
-            stats["pending"] = stats.get("pending",0) + 1
-
-        priority = task.get("priority")
-
-        stats[priority] = stats.get(priority,0) + 1
-
-    return stats
+def get_task_stats(data_stats):
+    tasks = data_stats()
+    if not tasks:
+        return None,("No tasks found to fetch",400)
+    return tasks,None
 
 #implementing function without input() and print() only structured response
 def add_task(task,insert_task):
     #validating name 
     if not task.name.strip():
-        return None,"Task name cannot br empty"
+        return None,("Task name cannot be empty",400)
     task.priority = task.priority.lower()
     if task.priority not in {"high","medium","low"}:
-        return None,"Invalid priority."
+        return None,("Invalid priority.",400)
     #DB
     insert_task(task.name,task.priority,task.due_date)
 
@@ -109,6 +99,17 @@ def add_task(task,insert_task):
         "status": False
     },None
         
+def sort_tasks(by,sort_data):
+    by = by.lower()
+    if by not in ["due_date","priority"]:
+        return None,("Invalid sort request. ",400)
+    
+    tasks = sort_data(by)
+    if not tasks:
+        return tasks,("No tasks found to sort",400)
+    
+    return tasks,None
+    
             
         
         
