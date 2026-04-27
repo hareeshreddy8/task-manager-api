@@ -33,13 +33,17 @@ def insert_task(name,priority,due_date):
     conn.commit()
     conn.close()
 
-def get_all_tasks():
+def get_all_tasks(page,limit,offset):
     conn = get_connection()
 
     cursor = conn.cursor()
+    query = f"""SELECT * FROM tasks LIMIT ? OFFSET ?"""
+    params = (limit,offset)
 
-    cursor.execute("SELECT * FROM tasks")
+    cursor.execute(query,params)
     rows = cursor.fetchall()
+    cursor.execute("""SELECT COUNT(*) FROM tasks""")
+    total = cursor.fetchone()[0]
 
     conn.close()
     tasks = []
@@ -54,7 +58,7 @@ def get_all_tasks():
         }
 
         tasks.append(task)
-    return tasks
+    return tasks,total
 def update_task_status(task_id):
     conn = get_connection()
 

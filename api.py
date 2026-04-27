@@ -1,3 +1,4 @@
+import math
 from typing import Optional,List
 from pydantic import BaseModel
 from datetime import date
@@ -53,10 +54,23 @@ def create_task_api(task : TaskCreate):
     }
 
 @app.get("/tasks",status_code=200)
-def get_tasks_api():
-    tasks = database.get_all_tasks()
-    return {"message": "Tasks fetched successfully",
-            "data": tasks }
+def get_tasks_api(page : int = 1,limit : int = 10):
+
+    info,error= task_manager.paginate_data(page,limit,database.get_all_tasks)
+    if error:
+        msg,code = error
+        raise HTTPException(status_code=code,detail=msg)
+    if info :
+        tasks , total = info
+    
+        return {"message": "Tasks fetched successfully",
+                "data": tasks,
+                "pages": page,
+                "limit": limit,
+                "total": total,
+                "total_pages":math.ceil(total/limit)
+                }
+    
 
 @app.put("/tasks/{task_id}",status_code=200)
 def mark_task_done_api(task_id:int):

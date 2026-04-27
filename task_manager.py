@@ -110,7 +110,21 @@ def sort_tasks(by,sort_data):
     
     return tasks,None
     
-            
+def paginate_data(page,limit,database):
+    if page < 1 :
+        return None,("Invalid page request. ",400)
+    
+    max_limit = 50
+    if limit > max_limit or limit <= 0 :
+        return None,("Invalid limit request. ",400)
+    limit = min(max_limit,limit)
+
+    offset = (page - 1) * limit
+
+    tasks,total = database(page,limit,offset)
+
+    
+    return [tasks,total],None
         
         
         
